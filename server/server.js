@@ -1,70 +1,79 @@
-const env = require("dotenv").config();
-const express = require("express");
-const { ApolloServer } = require("apollo-server-express");
-const path = require("path");
-const { typeDefs, resolvers } = require("../server/schemas");
-const db = require("./config/connection");
-const { authMiddleware } = require("./utils/auth");
-const e = require("express");
-const STRIPE_KEY = process.env.STRIPE_SECRET;
-const stripe = require("stripe")(STRIPE_KEY);
+// Import necessary modules
+const express = require('express');
+const path = require('path');
+const { ApolloServer } = require('apollo-server-express');
+const db = require('./config/connection');
+const { authMiddleware } = require('./utils/auth');
+const { typeDefs, resolvers } = require('./schemas');
+const stripe = require('stripe')(process.env.STRIPE_SECRET); // Make sure you have Stripe secret key in .env
+const dotenv = require('dotenv');
+
+// Load environment variables
+dotenv.config();
 
 const PORT = process.env.PORT || 3001;
 const app = express();
+
+// Middleware to handle JSON and URL encoded data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static assets if in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/build')));
+}
+
+// Set up Apollo server
 const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: authMiddleware,
 });
 
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../client/build")));
-}
-
-// Stripe Integration
-app.get("/config", (req, res) => {
-  res.send({
-    publishableKey: `${process.env.STRIPE_PUBLISHABLE}`,
-  });
-});
-
-app.post("/create-payment-intent", async (req, res) => {
-  try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      currency: "usd",
-      amount: 2000,
-      automatic_payment_methods: {
-        enabled: true,
-      },
-    });
-
-    res.send({ clientSecret: paymentIntent.client_secret });
-  } catch (error) {
-    return res.status(400).send({
-      error: {
-        message: error.message,
-      },
-    });
-  }
-});
-
-// Create a new instance of an Apollo server with the GraphQL schema
-const startApolloServer = async (typeDefs, resolvers) => {
+// Start Apollo server
+async function startApolloServer() {
   await server.start();
   server.applyMiddleware({ app });
 
-  db.once("open", () => {
+  db.once('open', () => {
     app.listen(PORT, () => {
-      console.log(`API server running on port ${PORT}!`);
-      console.log(
-        `Use GraphQL at http://localhost:${PORT}${server.graphqlPath}`
-      );
+      console.log(`API server running on port ${PORT}`);
+      console.log(`GraphQL available at http://localhost:${PORT}${server.graphqlPath}`);
     });
   });
-};
+}
 
-// Call the async function to start the server
-startApolloServer(typeDefs, resolvers);
+// Stripe Checkout session creation route
+app.post('/create-checkout-session', async (req, res) => {
+  try {
+    console.log('Received request to create checkout session'); // Debugging log
+
+    // Create a new checkout session with Stripe
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: 'price_1Q0txpRuJlUgN68mHbkiapPp', // Replace this with your actual Price ID
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: 'http://localhost:3000/success', // Redirect after successful payment
+      cancel_url: 'http://localhost:3000/cancel',   // Redirect if payment is canceled
+    });
+    
+    console.log('Checkout session created successfully:', session.id); // Debugging log
+    res.json({ id: session.id });
+  } catch (error) {
+    console.error('Error creating checkout session:', error); // Log the error
+    res.status(500).send({ error: 'Error creating checkout session' });
+  }
+});
+
+// Catch-all route to serve frontend in production
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+});
+
+// Start Apollo server
+startApolloServer();
