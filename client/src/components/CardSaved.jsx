@@ -7,33 +7,29 @@ import { useMutation } from "@apollo/client";
 import { Link } from "react-router-dom";
 
 const Card = () => {
-  // usequery for get all chairities for login in user
+  // usequery for getting all charities for the logged-in user
   const { data } = useQuery(QUERY_ME);
-  const charities = data.me?.charities || [];
+  const charities = data?.me?.charities || [];
   const [unSaveCharity] = useMutation(UNSAVE_CHARITY);
-  const [formState, setFormState] = useState({ charityId: "" });
 
-  // When user click on unsave button chairity is removed from user
+  // When user clicks on the "Unsave" button, the charity is removed from the user's list
   const handleSubmit = async (event) => {
-    // setting formstate variable for chairityId
-    const { name, value } = event.target;
-    // setting up form state value
-    setFormState({ ...formState, [name]: value });
+    const charityId = event.target.value; // Get charityId directly from button's value
 
     try {
-      const chairityData = await unSaveCharity({
+      const { data } = await unSaveCharity({
         variables: {
-          charityId: formState.charityId,
+          charityId, // Pass charityId directly here
         },
       });
+      console.log("Unsave successful:", data);
     } catch (error) {
-      console.log(error);
+      console.error("Error unsaving charity:", error);
     }
   };
 
-  const handleDonation = async (event) => {
+  const handleDonation = (event) => {
     localStorage.setItem("current-charity", event.target.value);
-    // window.location.replace("/donation");
   };
 
   return (
@@ -74,12 +70,12 @@ const Card = () => {
               </p>
               {/* CTAs */}
               <div className="flex flex-row py-2">
-                {/* Save Button */}
+                {/* Unsave Button */}
                 <button
                   id={charity._id}
                   value={charity._id}
                   name="charityId"
-                  onClick={handleSubmit}
+                  onClick={handleSubmit} // Handle unsave directly
                   className="py-4 px-5 mr-2 mb-2 text-sm font-medium text-white focus:outline-none bg-indigo-700 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-indigo-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-indigo-700 dark:hover:bg-gray-700"
                 >
                   Unsave
@@ -89,7 +85,7 @@ const Card = () => {
                   <button
                     id="donation"
                     value={charity._id}
-                    name="chairityId"
+                    name="charityId"
                     onClick={handleDonation}
                     className="py-4 px-5 mr-2 mb-2 text-sm font-medium text-white focus:outline-none bg-indigo-700 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-indigo-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-indigo-700 dark:hover:bg-gray-700"
                   >

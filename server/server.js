@@ -20,7 +20,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === 'production') {
+  // Serve static files from the React app
   app.use(express.static(path.join(__dirname, '../client/build')));
+
+  // Catch-all handler to serve React's index.html for any route not handled by API
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+  });
 }
 
 // Set up Apollo server
@@ -29,19 +35,6 @@ const server = new ApolloServer({
   resolvers,
   context: authMiddleware,
 });
-
-// Start Apollo server
-async function startApolloServer() {
-  await server.start();
-  server.applyMiddleware({ app });
-
-  db.once('open', () => {
-    app.listen(PORT, () => {
-      console.log(`API server running on port ${PORT}`);
-      console.log(`GraphQL available at http://localhost:${PORT}${server.graphqlPath}`);
-    });
-  });
-}
 
 // Stripe Checkout session creation route
 app.post('/create-checkout-session', async (req, res) => {
@@ -61,7 +54,7 @@ app.post('/create-checkout-session', async (req, res) => {
       success_url: 'http://localhost:3000/success', // Redirect after successful payment
       cancel_url: 'http://localhost:3000/cancel',   // Redirect if payment is canceled
     });
-    
+
     console.log('Checkout session created successfully:', session.id); // Debugging log
     res.json({ id: session.id });
   } catch (error) {
@@ -70,10 +63,21 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
-// Catch-all route to serve frontend in production
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build/index.html'));
-});
-
 // Start Apollo server
+async function startApolloServer() {
+  try {
+    await server.start(); // Ensure the Apollo server starts successfully
+    server.applyMiddleware({ app });
+
+    db.once('open', () => {
+      app.listen(PORT, () => {
+        console.log(`API server running on port ${PORT}`);
+        console.log(`GraphQL available at http://localhost:${PORT}${server.graphqlPath}`);
+      });
+    });
+  } catch (error) {
+    console.error('Error starting Apollo Server or connecting to DB:', error);
+  }
+}
+
 startApolloServer();
