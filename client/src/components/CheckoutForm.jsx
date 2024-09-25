@@ -11,29 +11,27 @@ export default function CheckoutForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!stripe || !elements) {
       return;
     }
-
+  
     setIsProcessing(true);
-
-    const { error, paymentIntent } = await stripe.confirmPayment({
+  
+    const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
+        // Optionally send additional information to Stripe
         return_url: `${window.location.origin}/portfolio`,
       },
-      redirect: "if_required",
     });
-
+  
     if (error) {
       setMessage(error.message);
-    } else if (paymentIntent?.status === "succeeded") {
-      setMessage("Congrats! Your donation was successful 🎉");
     } else {
-      setMessage("An unexpected error occurred.");
+      setMessage("Payment succeeded!");
     }
-
+  
     setIsProcessing(false);
 
     // Redirect to homepage after 3 seconds

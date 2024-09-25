@@ -3,6 +3,7 @@ require('dotenv').config();
 // Import necessary modules
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 const { ApolloServer } = require('apollo-server-express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const db = require('./config/connection');
@@ -12,6 +13,7 @@ const { typeDefs, resolvers } = require('./schemas');
 const PORT = process.env.PORT || 3001;
 const app = express();
 
+app.use(cors());
 // Middleware to handle JSON and URL encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -44,13 +46,13 @@ app.post('/create-checkout-session', async (req, res) => {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: 'price_1Q2lDdCGljRi9xVfOwvvI1m1', // Replace this with your actual Price ID from Stripe
+          price: 'price_1Q2lDdCGljRi9xVfOwvvI1m1',
           quantity: 1,
         },
       ],
       mode: 'payment',
-      success_url: 'http://localhost:3000/success', // Adjust as needed
-      cancel_url: 'http://localhost:3000/cancel',   // Adjust as needed
+      success_url: 'http://localhost:3000/success',
+      cancel_url: 'http://localhost:3000/cancel', 
     });
 
 <<<<<<< HEAD
@@ -66,6 +68,7 @@ app.post('/create-checkout-session', async (req, res) => {
 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // Start Apollo server
 async function startApolloServer() {
   try {
@@ -73,6 +76,31 @@ async function startApolloServer() {
     server.applyMiddleware({ app });
 
 =======
+=======
+app.get('/config', (req, res) => {
+  res.json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
+});
+
+app.post('/create-payment-intent', async (req, res) => {
+  try {
+    console.log('Request Body:', req.body); // Debugging log
+    const { amount } = req.body;
+    console.log('Amount Received:', amount);
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency: 'cad',
+      automatic_payment_methods: { enabled: true },
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    console.error('Error creating payment intent:', error);
+    res.status(500).send({ error: 'Error creating payment intent' });
+  }
+});
+
+>>>>>>> 6a54a433 (add stripe payment test)
 // Set up Apollo Server
 async function startApolloServer() {
   try {

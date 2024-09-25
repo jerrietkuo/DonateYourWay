@@ -5,6 +5,7 @@ import { loadStripe } from '@stripe/stripe-js';
 
 // Load Stripe using your publishable key from the .env file
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+console.log('Publishable Key:', process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const CardCheckOut = () => {
   const currentCharity = localStorage.getItem("current-charity");
