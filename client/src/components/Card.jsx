@@ -70,14 +70,12 @@ const Card = () => {
         </select>
       </div>
 
-      <div className="flex flex-row flex-wrap justify-center space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filteredCharities.map((charity) => (
           // Card for each charity
           <div
-            type="card"
-            data-modal-toggle="defaultModal"
             key={charity._id}
-            className="max-w-sm w-96 overflow-hidden shadow-lg rounded-lg"
+            className="w-full h-[450px] overflow-hidden shadow-lg rounded-lg flex flex-col justify-between"
           >
             {/* Charity Image */}
             <img
@@ -87,26 +85,29 @@ const Card = () => {
               alt={charity.name}
             />
             {/* Charity Info */}
-            <div className="p-4">
-              <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">
-                {charity.categories[0]?.name}
-              </span>
-              <h5 className="mt-4 mb-2 text-2xl font-bold tracking-tight text-gray-900">
-                {charity.name}
-              </h5>
-              <a
-                href={charity.link}
-                className="font-normal text-indigo-400"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Visit Site
-              </a>
-              <p className="mb-8 font-normal text-xs text-gray-700">
-                EIN: {charity.ein}
-              </p>
+            <div className="p-4 flex flex-col justify-between flex-grow">
+              <div>
+                <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">
+                  {charity.categories[0]?.name}
+                </span>
+                <h5 className="mt-4 mb-2 text-2xl font-bold tracking-tight text-gray-900">
+                  {charity.name}
+                </h5>
+                <a
+                  href={charity.link}
+                  className="font-normal text-indigo-400"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Visit Site
+                </a>
+                <p className="mb-8 font-normal text-xs text-gray-700">
+                  EIN: {charity.ein}
+                </p>
+              </div>
+
               {/* Action Buttons */}
-              <div className="flex flex-row py-2">
+              <div className="flex flex-row py-2 mt-auto">
                 {/* Save Button */}
                 <button
                   onClick={() => handleSubmit(charity._id)}
