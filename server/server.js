@@ -55,11 +55,7 @@ app.post('/create-checkout-session', async (req, res) => {
       cancel_url: 'http://localhost:3000/cancel', 
     });
 
-<<<<<<< HEAD
-    console.log('Checkout session created successfully:', session.id); // Debugging log
-=======
     console.log('Checkout session created successfully:', session.id);
->>>>>>> 9378f90d (add stripe payment in backend)
     res.json({ id: session.id });
   } catch (error) {
     console.error('Error creating checkout session:', error);
@@ -67,16 +63,6 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-// Start Apollo server
-async function startApolloServer() {
-  try {
-    await server.start(); // Ensure the Apollo server starts successfully
-    server.applyMiddleware({ app });
-
-=======
-=======
 app.get('/config', (req, res) => {
   res.json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
 });
@@ -100,7 +86,6 @@ app.post('/create-payment-intent', async (req, res) => {
   }
 });
 
->>>>>>> 6a54a433 (add stripe payment test)
 // Set up Apollo Server
 async function startApolloServer() {
   try {
@@ -114,7 +99,6 @@ async function startApolloServer() {
     server.applyMiddleware({ app });
 
     // Start the Express server after the database connection is open
->>>>>>> 9378f90d (add stripe payment in backend)
     db.once('open', () => {
       app.listen(PORT, () => {
         console.log(`API server running on port ${PORT}`);
@@ -122,11 +106,7 @@ async function startApolloServer() {
       });
     });
   } catch (error) {
-<<<<<<< HEAD
     console.error('Error starting Apollo Server or connecting to DB:', error);
-=======
-    console.error('Error starting Apollo Server or connecting to the database:', error);
->>>>>>> 9378f90d (add stripe payment in backend)
   }
 }
 
