@@ -39,8 +39,6 @@ const CardCheckOut = ({ onPaymentIntentCreated }) => {
       // Notify parent component (Donation.js) that the payment intent is created
       onPaymentIntentCreated(clientSecret, amount, charity._id);
 
-      // Clear the amount input field
-      amountRef.current.value = "";
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred while processing your payment. Please try again.');

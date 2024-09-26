@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useStripe, useElements, PaymentElement } from "@stripe/react-stripe-js";
 import { useMutation } from '@apollo/client';
 import { ADD_DONATION } from '../utils/mutations';
+import { USER_SUMMARY } from '../utils/queries'; // Import the query to refetch
 import '../styles/checkout.css';
 
 export default function CheckoutForm({ onPaymentSuccess, onMessage, charityId, donationAmount }) {
@@ -11,7 +12,9 @@ export default function CheckoutForm({ onPaymentSuccess, onMessage, charityId, d
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPaymentElement, setShowPaymentElement] = useState(true);
 
-  const [addDonation] = useMutation(ADD_DONATION);
+  const [addDonation] = useMutation(ADD_DONATION, {
+    refetchQueries: [{ query: USER_SUMMARY }], // Refetch user summary after donation
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,8 +50,15 @@ export default function CheckoutForm({ onPaymentSuccess, onMessage, charityId, d
             },
           });
           console.log('Donation saved:', data.addDonation);
+
+          // Notify parent component that payment and donation saving were successful
+          if (onPaymentSuccess) {
+            onPaymentSuccess();
+          }
+
         } catch (err) {
           console.error('Error saving donation:', err);
+          onMessage('Donation could not be saved. Please try again.');
         }
 
         // Reset the Payment Element if needed
@@ -56,11 +66,6 @@ export default function CheckoutForm({ onPaymentSuccess, onMessage, charityId, d
         setTimeout(() => {
           setShowPaymentElement(true);
         }, 0);
-
-        // Notify parent component
-        if (onPaymentSuccess) {
-          onPaymentSuccess();
-        }
       } else {
         console.log('PaymentIntent status:', paymentIntent.status);
         onMessage("Payment processing. Please wait...");
