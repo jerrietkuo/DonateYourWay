@@ -23,33 +23,33 @@ export const ADD_USER = gql`
   }
 `;
 export const ADD_DONATION = gql`
-  mutation Mutation(
-    $donationAmount: Float!
-    $donationDate: String!
-    $charity: ID!
+  mutation AddDonation(
+  $donationAmount: Float!
+  $donationDate: String!
+  $charity: ID!
+) {
+  addDonation(
+    donationAmount: $donationAmount
+    donationDate: $donationDate
+    charity: $charity
   ) {
-    addDonation(
-      donationAmount: $donationAmount
-      donationDate: $donationDate
-      charity: $charity
-    ) {
+    _id
+    charity {
       _id
-      charity {
-        _id
-        ein
-        link
-        location
-        mission
-        name
-      }
-      donationAmount
-      donationDate
-      user {
-        _id
-        username
-      }
+      ein
+      link
+      location
+      mission
+      name
+    }
+    donationAmount
+    donationDate
+    user {
+      _id
+      username
     }
   }
+}
 `;
 export const SAVE_CHARITY = gql`
   mutation Mutation($charityId: ID!) {

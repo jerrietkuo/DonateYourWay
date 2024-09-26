@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import {
-  useStripe,
-  useElements,
-  PaymentElement,
-} from "@stripe/react-stripe-js";
-import '../styles/checkout.css'; 
+import { useStripe, useElements, PaymentElement } from "@stripe/react-stripe-js";
+import { useMutation } from '@apollo/client';
+import { ADD_DONATION } from '../utils/mutations';
+import '../styles/checkout.css';
 
-export default function CheckoutForm({ onPaymentSuccess, onMessage }) {
+export default function CheckoutForm({ onPaymentSuccess, onMessage, charityId, donationAmount }) {
   const stripe = useStripe();
   const elements = useElements();
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPaymentElement, setShowPaymentElement] = useState(true);
+
+  const [addDonation] = useMutation(ADD_DONATION);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,6 +37,21 @@ export default function CheckoutForm({ onPaymentSuccess, onMessage }) {
         console.log('Payment succeeded:', paymentIntent);
         onMessage("Thank you! Your donation was successful. 🎉");
 
+        // Call the addDonation mutation here
+        try {
+          const { data } = await addDonation({
+            variables: {
+              donationAmount: donationAmount / 100, // Convert back to dollars
+              donationDate: new Date().toISOString(),
+              charity: charityId,
+            },
+          });
+          console.log('Donation saved:', data.addDonation);
+        } catch (err) {
+          console.error('Error saving donation:', err);
+        }
+
+        // Reset the Payment Element if needed
         setShowPaymentElement(false);
         setTimeout(() => {
           setShowPaymentElement(true);
@@ -56,20 +71,15 @@ export default function CheckoutForm({ onPaymentSuccess, onMessage }) {
     }
 
     setIsProcessing(false);
-
-    // Redirect to homepage after 3 seconds
-    setTimeout(() => {
-      window.location.href = `${window.location.origin}/`;
-    }, 3000);
   };
 
   return (
-    <div className="checkout-body">
+    <div>
       <form id="payment-form" onSubmit={handleSubmit}>
         {showPaymentElement && <PaymentElement id="payment-element" />}
         <button disabled={isProcessing || !stripe || !elements} id="submit">
           <span id="button-text">
-            {isProcessing ? "Processing..." : "Pay now"}
+            {isProcessing ? "Processing ..." : "Pay now"}
           </span>
         </button>
       </form>

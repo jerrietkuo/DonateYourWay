@@ -100,32 +100,34 @@ const resolvers = {
 
     //   throw new AuthenticationError("Not logged in!");
     // },
-    addDonation: async (parent, { donationAmount, donationDate, user, charity }, context) => {
+    addDonation: async (parent, { donationAmount, donationDate, charity }, context) => {
       // Check if the user is logged in
       if (context.user) {
         // Create a new donation
         const donation = await Donation.create({
           donationAmount,
           donationDate,
-          user,     // Directly using the user ID passed in
-          charity,  // Directly using the charity ID passed in
+          user: context.user._id, // Automatically use the logged-in user's ID
+          charity,
         });
-    console.log(donation);
+    
+        console.log('Donation created:', donation);
+    
         // Add the donation ID to the user's donations array
         await User.findByIdAndUpdate(
-          user,  // The ID of the user making the donation
-          { $push: { donations: donation._id } },  // Push the donation ID to the user's donations array
+          context.user._id, // The logged-in user's ID
+          { $push: { donations: donation._id } }, // Push the donation ID to the user's donations array
           { new: true }
         );
     
         // Return the donation with populated user and charity info
         return await Donation.findById(donation._id)
-          .populate('user', 'username')    // Populate user with username
-          .populate('charity', 'name');    // Populate charity with name
+          .populate('user', 'username') // Populate user with username
+          .populate('charity', 'name'); // Populate charity with name
       }
     
       // Throw an error if the user is not logged in
-      throw new AuthenticationError("Not logged in! according to the website");
+      throw new AuthenticationError("You need to be logged in!");
     },
     
     

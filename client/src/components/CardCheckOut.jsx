@@ -11,8 +11,7 @@ const CardCheckOut = ({ onPaymentIntentCreated }) => {
     variables: { charityId: currentCharity },
   });
 
-  // Destructure charity data from the response
-  const charity = data?.charity;
+  const charity = data?.charity || [];
 
   const handleDonateClick = async () => {
     if (!amountRef.current || !amountRef.current.value) {
@@ -38,7 +37,7 @@ const CardCheckOut = ({ onPaymentIntentCreated }) => {
       const { clientSecret } = await response.json();
 
       // Notify parent component (Donation.js) that the payment intent is created
-      onPaymentIntentCreated(clientSecret);
+      onPaymentIntentCreated(clientSecret, amount, charity._id);
 
       // Clear the amount input field
       amountRef.current.value = "";
@@ -53,7 +52,7 @@ const CardCheckOut = ({ onPaymentIntentCreated }) => {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="w-full flex flex-row flex-wrap justify-center text-black">
+    <div className="w-full flex justify-center">
       <div className="m-2 max-w-xs bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700">
         <img
           style={{ height: "200px" }}
