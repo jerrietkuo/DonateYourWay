@@ -6,9 +6,18 @@ const { model } = require("mongoose");
 const resolvers = {
   // QUERY
   Query: {
+   
+
     users: async () => {
-      return User.find();
+      return await User.find()
+        .populate({
+          path: 'donations', // Path to the donations array
+          select: 'donationAmount' // Only select the donationAmount field
+        });
     },
+
+
+
 
     user: async (parent, { userId }) => {
       return User.findOne({ _id: userId });
@@ -44,10 +53,21 @@ const resolvers = {
 
     // GET all Donations
     donations: async () => {
-      return Donation.find();
-    },
-  },
+      return await Donation.find()
+        .populate({
+          path: 'user',  // Populate the user associated with the donation
+          select: '_id username',  // Select only the fields you need
+        })
+        .populate({
+          path: 'charity',  // Populate the charity associated with the donation
+          
+        });
+    }
+},
 
+
+
+  
   // MUTATIONS
   Mutation: {
     //POST: Adding a new user
@@ -58,29 +78,57 @@ const resolvers = {
     },
 
     // POST new Donation to User
-    addDonation: async (
-      parent,
-      { donationAmount, donationDate, charity },
-      context
-    ) => {
+    // addDonation: async (
+    //   parent,
+    //   { donationAmount, donationDate, charity },
+    //   context
+    // ) => {
+    //   if (context.user) {
+    //     const donation = await Donation.create({
+    //       donationAmount: donationAmount,
+    //       donationDate: donationDate,
+    //       user: context.user._id,
+    //       charity: charity,
+    //     });
+    //     console.log("donation", donation);
+    //     await User.findByIdAndUpdate(context.user._id, {
+    //       $push: { donations: donation._id },
+    //     });
+
+    //     return donation;
+    //   }
+
+    //   throw new AuthenticationError("Not logged in!");
+    // },
+    addDonation: async (parent, { donationAmount, donationDate, user, charity }, context) => {
+      // Check if the user is logged in
       if (context.user) {
+        // Create a new donation
         const donation = await Donation.create({
-          donationAmount: donationAmount,
-          donationDate: donationDate,
-          user: context.user._id,
-          charity: charity,
+          donationAmount,
+          donationDate,
+          user,     // Directly using the user ID passed in
+          charity,  // Directly using the charity ID passed in
         });
-        console.log("donation", donation);
-        await User.findByIdAndUpdate(context.user._id, {
-          $push: { donations: donation._id },
-        });
-
-        return donation;
+    console.log(donation);
+        // Add the donation ID to the user's donations array
+        await User.findByIdAndUpdate(
+          user,  // The ID of the user making the donation
+          { $push: { donations: donation._id } },  // Push the donation ID to the user's donations array
+          { new: true }
+        );
+    
+        // Return the donation with populated user and charity info
+        return await Donation.findById(donation._id)
+          .populate('user', 'username')    // Populate user with username
+          .populate('charity', 'name');    // Populate charity with name
       }
-
-      throw new AuthenticationError("Not logged in!");
+    
+      // Throw an error if the user is not logged in
+      throw new AuthenticationError("Not logged in! according to the website");
     },
-
+    
+    
     // PUT login verification
     login: async (parent, { email, password }) => {
       const user = await User.findOne({ email });
@@ -135,6 +183,46 @@ const resolvers = {
       );
 
       return updateUserCharity;
+    },
+
+    // add a friend to the users friends list
+
+    // addFriend: async (parent, { friendId }, context) => {
+    //   // Updating the user to have that friend added to their friends list
+    //   const updatedUser = await User.findOneAndUpdate(
+    //     { _id: context.user._id },
+    //     { $addToSet: { friends: friendId } },
+    //     { new: true }
+    //   );
+
+    //   return updatedUser;
+    // },
+
+    // // ADD FRIEND TO USER (without JWT token)
+    // addFriend: async (parent, { userId, friendId }) => {
+    //   // Updating the specified user to have that friend added to their friends list
+    //   const updatedUser = await User.findOneAndUpdate(
+    //     { _id: userId },
+    //     { $addToSet: { friends: friendId } },
+    //     { new: true }
+    //   );
+
+    //   return updatedUser;
+    // },
+
+    // ADD FRIEND TO USER (without JWT token)
+    addFriend: async (parent, { userId, friendId }) => {
+      // Updating the specified user to have that friend added to their friends list
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: userId },
+        { $addToSet: { friends: friendId } },
+        { new: true }
+      );
+
+      // Fetching the details of the updated user's friends
+      const populatedUser = await User.findById(userId).populate("friends");
+
+      return populatedUser;
     },
   },
 };
