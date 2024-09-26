@@ -6,12 +6,12 @@ import {
 } from "@stripe/react-stripe-js";
 import '../styles/checkout.css'; 
 
-export default function CheckoutForm() {
+export default function CheckoutForm({ onPaymentSuccess, onMessage }) {
   const stripe = useStripe();
   const elements = useElements();
 
-  const [message, setMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showPaymentElement, setShowPaymentElement] = useState(true);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,17 +32,27 @@ export default function CheckoutForm() {
 
       if (error) {
         console.error('Error during payment confirmation:', error);
-        setMessage(error.message);
+        onMessage(error.message);
       } else if (paymentIntent && paymentIntent.status === "succeeded") {
         console.log('Payment succeeded:', paymentIntent);
-        setMessage("Thank you! Your donation was successful. 🎉");
+        onMessage("Thank you! Your donation was successful. 🎉");
+
+        setShowPaymentElement(false);
+        setTimeout(() => {
+          setShowPaymentElement(true);
+        }, 0);
+
+        // Notify parent component
+        if (onPaymentSuccess) {
+          onPaymentSuccess();
+        }
       } else {
         console.log('PaymentIntent status:', paymentIntent.status);
-        setMessage("Payment processing. Please wait...");
+        onMessage("Payment processing. Please wait...");
       }
     } catch (err) {
       console.error('Exception during payment confirmation:', err);
-      setMessage('An error occurred during payment processing.');
+      onMessage('An error occurred during payment processing.');
     }
 
     setIsProcessing(false);
@@ -56,14 +66,12 @@ export default function CheckoutForm() {
   return (
     <div className="checkout-body">
       <form id="payment-form" onSubmit={handleSubmit}>
-        <PaymentElement id="payment-element" />
+        {showPaymentElement && <PaymentElement id="payment-element" />}
         <button disabled={isProcessing || !stripe || !elements} id="submit">
           <span id="button-text">
             {isProcessing ? "Processing..." : "Pay now"}
           </span>
         </button>
-        {/* Show any error or success messages */}
-        {message && <div id="payment-message">{message}</div>}
       </form>
     </div>
   );
