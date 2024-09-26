@@ -1,12 +1,14 @@
+// models/Donation.js
 const { Schema, model } = require("mongoose");
 
 const donationSchema = new Schema({
   donationAmount: {
     type: Number,
     required: true,
-    minlength: 1,
-    maxlength: 280,
-    trim: true,
+    validate: {
+      validator: Number.isInteger,
+      message: '{VALUE} is not an integer value',
+    },
   },
   donationDate: {
     type: Date,
@@ -15,11 +17,13 @@ const donationSchema = new Schema({
   },
   user: {
     type: Schema.Types.ObjectId,
-    ref: "User",
+    ref: "User", // Reference to the User model
+    required: true,
   },
   charity: {
     type: Schema.Types.ObjectId,
-    ref: "Charity",
+    ref: "Charity", // Reference to the Charity model
+    required: true,
   },
 });
 

@@ -36,6 +36,11 @@ const userSchema = new Schema(
         ref: "Category",
       },
     ],
+    friends: [
+      { type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   // set this to use virtual below
   {
