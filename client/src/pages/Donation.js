@@ -1,62 +1,54 @@
-import React, { useEffect, useState } from "react";
+// client/src/pages/Donation.js
+
+import React, { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import CheckoutForm from "../components/CheckoutForm";
-import CardSaved from "../components/CardCheckOut";
+import CardCheckOut from "../components/CardCheckOut";
 import { Elements } from "@stripe/react-stripe-js";
 
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+
 export default function Donation() {
-  const [stripePromise, setStripePromise] = useState(null);
   const [clientSecret, setClientSecret] = useState("");
+  const [message, setMessage] = useState("");
+  const [donationAmount, setDonationAmount] = useState(0);
+  const [charityId, setCharityId] = useState("");
 
-  useEffect(() => {
-    fetch("/config").then(async (r) => {
-      const { publishableKey } = await r.json();
+  const handlePaymentIntentCreated = (clientSecret, amount, charity) => {
+    setClientSecret(clientSecret);
+    setDonationAmount(amount);
+    setCharityId(charity);
+  };
 
-      setStripePromise(loadStripe(publishableKey));
-    });
-  }, []);
+  const handlePaymentSuccess = () => {
+    setClientSecret("");
+  };
 
-  useEffect(() => {
-    fetch("/create-payment-intent", {
-      method: "POST",
-      body: JSON.stringify({}),
-    }).then(async (r) => {
-      const { clientSecret } = await r.json();
-
-      setClientSecret(clientSecret);
-      return r;
-    });
-  }, []);
+  const handleMessage = (msg) => {
+    setMessage(msg);
+  };
 
   return (
-    <div className="flex flex-col-2">
-      <div className="text-center">
-        <h1 className="text-2xl m-5">How much would you like to give?</h1>
-        <div>
-          <form className="flex flex-col gap-4 ml-6 mb-2 border-gray-200 rounded-lg">
-            <div>
-              <div className="m-2 block">
-                <label htmlFor="donation" value="Donation amount" />
-              </div>
-              <input
-                className="rounded-md border-gray-200"
-                id="donation"
-                type="number"
-                name="price"
-                placeholder="$25.00"
-                required={true}
-              />
-            </div>
-          </form>
+    <div className="flex flex-col items-center">
+      {/* Display the charity card with amount input and donate button */}
+      <CardCheckOut onPaymentIntentCreated={handlePaymentIntentCreated} />
+      {clientSecret && (
+        <div className="mt-4">
+          <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <CheckoutForm
+              onPaymentSuccess={handlePaymentSuccess}
+              onMessage={handleMessage}
+              charityId={charityId}
+              donationAmount={donationAmount}
+            />
+          </Elements>
         </div>
-        <div>
-          <CardSaved />
+      )}
+      {/* Display the confirmation message */}
+      {message && (
+        <div id="payment-message" className="mt-4 text-green-600">
+          {message}
         </div>
-      </div>
-      {stripePromise && clientSecret && (
-        <Elements stripe={stripePromise} options={{ clientSecret }}>
-          <CheckoutForm />
-        </Elements>
       )}
     </div>
   );

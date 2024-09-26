@@ -1,59 +1,56 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery } from "@apollo/client";
 import { SINGLE_CHARITY } from "../utils/queries";
-import { loadStripe } from '@stripe/stripe-js';
 
-// Load Stripe using your publishable key from the .env file
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+const CardCheckOut = ({ onPaymentIntentCreated }) => {
+  const [loadingPayment, setLoadingPayment] = useState(false);
+  const amountRef = useRef(null);
 
-const CardCheckOut = () => {
-  const currentCharity = localStorage.getItem("current-charity");
-  
-  // Fetch charity data using the current charity ID from localStorage
-  const { data, loading, error } = useQuery(SINGLE_CHARITY, {
+  let currentCharity = localStorage.getItem("current-charity");
+  const { data, loading } = useQuery(SINGLE_CHARITY, {
     variables: { charityId: currentCharity },
   });
 
-  // Destructure charity data from the response
-  const charity = data?.charity;
+  const charity = data?.charity || [];
 
   const handleDonateClick = async () => {
-    try {
-      const stripe = await stripePromise;
+    if (!amountRef.current || !amountRef.current.value) {
+      alert('Please enter a donation amount.');
+      return;
+    }
+    const amount = amountRef.current.value * 100; // Convert to cents
 
-      // Create a checkout session by making a request to the backend
-      const response = await fetch('/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    setLoadingPayment(true);
+
+    try {
+      const response = await fetch("http://localhost:3001/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create checkout session');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Server error');
       }
 
-      const session = await response.json();
+      const { clientSecret } = await response.json();
 
-      // Redirect to Stripe Checkout
-      const result = await stripe.redirectToCheckout({
-        sessionId: session.id,
-      });
+      // Notify parent component (Donation.js) that the payment intent is created
+      onPaymentIntentCreated(clientSecret, amount, charity._id);
 
-      if (result.error) {
-        console.error(result.error.message);
-      }
     } catch (error) {
-      console.error("Error during donation process:", error);
+      console.error('Error:', error);
+      alert('An error occurred while processing your payment. Please try again.');
+    } finally {
+      setLoadingPayment(false);
     }
   };
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error loading charity information</p>;
-  if (!charity) return <p>No charity found</p>;
 
   return (
-    <div className="flex flex-row flex-wrap justify-center text-black">
+    <div className="w-full flex justify-center">
       <div className="m-2 max-w-xs bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700">
         <img
           style={{ height: "200px" }}
@@ -71,11 +68,24 @@ const CardCheckOut = () => {
         </div>
 
         <div className="p-5 text-center">
+          <div>
+            <label htmlFor="donation">Donation Amount ($):</label>
+            <input
+              className="rounded-md border-gray-200 ml-2"
+              id="donation"
+              type="number"
+              name="price"
+              placeholder="25.00"
+              required
+              ref={amountRef}
+            />
+          </div>
           <button
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"
             onClick={handleDonateClick}
+            disabled={loadingPayment}
           >
-            Donate
+            {loadingPayment ? 'Processing...' : 'Donate'}
           </button>
         </div>
       </div>

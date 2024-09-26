@@ -100,32 +100,43 @@ const resolvers = {
 
     //   throw new AuthenticationError("Not logged in!");
     // },
-    addDonation: async (parent, { donationAmount, donationDate, user, charity }, context) => {
-      // Check if the user is logged in
+    addDonation: async (parent, { donationAmount, donationDate, charity }, context) => {
       if (context.user) {
+        // Find the charity and its associated categories
+        const charityData = await Charity.findById(charity).populate('categories');
+    
         // Create a new donation
         const donation = await Donation.create({
           donationAmount,
           donationDate,
-          user,     // Directly using the user ID passed in
-          charity,  // Directly using the charity ID passed in
+          user: context.user._id,
+          charity,
         });
-    console.log(donation);
+    
+        console.log('Donation created:', donation);
+    
         // Add the donation ID to the user's donations array
+        const updatedUser = await User.findByIdAndUpdate(
+          context.user._id,
+          { $push: { donations: donation._id } },
+          { new: true }
+        );
+    
+        // Update user with the categories associated with the charity
+        const categoryIds = charityData.categories.map((category) => category._id);
         await User.findByIdAndUpdate(
-          user,  // The ID of the user making the donation
-          { $push: { donations: donation._id } },  // Push the donation ID to the user's donations array
+          context.user._id,
+          { $addToSet: { categories: { $each: categoryIds } } }, // Ensure categories are added to user's profile
           { new: true }
         );
     
         // Return the donation with populated user and charity info
         return await Donation.findById(donation._id)
-          .populate('user', 'username')    // Populate user with username
-          .populate('charity', 'name');    // Populate charity with name
+          .populate('user', 'username')
+          .populate('charity', 'name');
       }
     
-      // Throw an error if the user is not logged in
-      throw new AuthenticationError("Not logged in! according to the website");
+      throw new AuthenticationError('You need to be logged in!');
     },
     
     
