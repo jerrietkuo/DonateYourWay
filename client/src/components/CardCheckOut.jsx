@@ -51,8 +51,6 @@ const CardCheckOut = ({ onPaymentIntentCreated }) => {
   };
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error loading charity information</p>;
-  if (!charity) return <p>No charity found</p>;
 
   return (
     <div className="w-full flex flex-row flex-wrap justify-center text-black">
