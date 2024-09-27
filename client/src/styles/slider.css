@@ -1,0 +1,14 @@
+/* Slider.css */
+.mission {
+  display: -webkit-box; /* Use box model */
+  -webkit-box-orient: vertical; /* Orient the box vertically */
+  overflow: hidden; /* Hide overflow text */
+  -webkit-line-clamp: 3; /* Limit to 3 lines (or adjust as needed) */
+  line-height: 1.5; /* Set line height for spacing */
+  max-height: 4.5em; /* Set max height based on line height and number of lines */
+}
+
+h5 {
+  max-height: 2.5em; /* Adjust as needed */
+  line-height: 1.25em; /* Set line-height to match */
+}

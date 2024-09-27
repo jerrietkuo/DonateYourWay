@@ -8,6 +8,8 @@ import {
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 
+
+
 import Navbar from "./components/Navbar";
 import Portfolio from "./pages/Portfolio";
 import Footer from "./components/Footer";
@@ -49,6 +51,7 @@ export default function App() {
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/donation" element={<Donation />} />
           </Routes>
+        
           <Footer />
         </div>
       </Router>
