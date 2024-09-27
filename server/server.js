@@ -29,13 +29,6 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Set up Apollo server
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  context: authMiddleware,
-});
-
 // Stripe Checkout session creation route
 app.post('/create-checkout-session', async (req, res) => {
   try {
@@ -51,8 +44,8 @@ app.post('/create-checkout-session', async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: 'http://localhost:3000/success',
-      cancel_url: 'http://localhost:3000/cancel', 
+      success_url: '/success',
+      cancel_url: '/cancel', 
     });
 
     console.log('Checkout session created successfully:', session.id);
