@@ -23,7 +23,7 @@ const CardCheckOut = ({ onPaymentIntentCreated }) => {
     setLoadingPayment(true);
 
     try {
-      const response = await fetch("http://localhost:3001/create-payment-intent", {
+      const response = await fetch("/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount }),
