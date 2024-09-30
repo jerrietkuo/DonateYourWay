@@ -1,4 +1,4 @@
-# MERN Stack Project - [Project Name]
+# MERN Stack Project - Donate Your Way
 
 ## Description
 
@@ -69,8 +69,8 @@ Donations (embedded in User):
   - date (Date)
 
 ## Screenshots
-![Home Page Screenshot](public/webdonate.png)
-![Donation Screenshot](public/webdonation.png)
+![Home Page Screenshot](./client/public/webdonate.png)
+![Donation Screenshot](./client/public/webdonation.png)
 
 https://donateyourway.onrender.com/
 
