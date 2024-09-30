@@ -8,6 +8,7 @@ import {
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 
+import './index.css'; // Adjust the path if necessary
 
 
 import Navbar from "./components/Navbar";
@@ -17,8 +18,10 @@ import Home from "./pages/Home";
 import LoginSignup from "./pages/LoginSignup";
 import Donation from "./pages/Donation";
 import Explore from "./pages/Explore";
+import About from "./pages/About";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Licensing from "./pages/Licensing";
+import Contact from "./pages/Contact";
 
 const httpLink = createHttpLink({
   uri: "/graphql",
@@ -44,16 +47,19 @@ export default function App() {
   return (
     <ApolloProvider client={client}>
       <Router>
-        <div>
+      <div className="min-h-screen" style={{ minHeight: "100vh", backgroundColor: "#93c5fd" }} >
+        
           <Navbar />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/explore" element={<Explore />} />
+            <Route path="/about" element={<About />} />
             <Route path="/login" element={<LoginSignup />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/donation" element={<Donation />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/licensing" element={<Licensing />} />
+            <Route path="/contact" element={<Contact />} />
           </Routes>
         
           <Footer />

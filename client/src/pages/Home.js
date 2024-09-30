@@ -6,14 +6,15 @@ import Slider from "../components/Slider";
 
 export default function Home() {
   return (
+    // <div
+    //   className="home"
+
+    // >
+    //   <div className="container mx-auto px-1 bg-softGreen">
     <div
-      className="home"
-      style={{
-        background:
-          "radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
-      }}
-    >
-      <div className="container mx-auto px-1">
+    style={{ minHeight: "100vh", backgroundColor: "#93c5fd" }}
+  >
+    <div className="container mt-4 mx-auto px-1">
         <Header />
         <Slider />
       </div>

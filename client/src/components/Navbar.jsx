@@ -6,7 +6,7 @@ function Nav() {
   const isLoggedIn = Auth.loggedIn();
 
   return (
-      <nav className="flex flex-row-reverse items-center justify-between bg-indigo-700 p-6">
+      <nav className="flex flex-row-reverse items-center justify-between bg-indigo-700 p-1">
           <h1>
             <Link to="/">
               <span className="self-center text-xl p-2 font-bold whitespace-nowrap text-white">DonateYourWay</span>
@@ -21,6 +21,9 @@ function Nav() {
               </li>
               <li className="block mt-4 lg:inline-block lg:mt-0 text-white hover:font-semibold mr-4">
                 <Link to="/portfolio">Portfolio</Link>
+              </li>
+              <li className="block mt-4 lg:inline-block lg:mt-0 text-white hover:font-semibold mr-4">
+                <Link to="/about">About</Link>
               </li>
             </>
             ) : (
