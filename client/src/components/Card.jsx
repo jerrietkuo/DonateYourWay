@@ -70,12 +70,12 @@ const Card = () => {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" >
         {filteredCharities.map((charity) => (
           // Card for each charity
           <div
             key={charity._id}
-            className="min-w-[350px] w-full max-w-[350px] h-[550px] overflow-hidden shadow-lg rounded-lg flex flex-col justify-between"
+            className="min-w-[350px] w-full max-w-[350px] h-[550px] overflow-hidden shadow-lg rounded-lg flex flex-col justify-between" style={{ backgroundColor: "#eff6ff" }}
           >
             {/* Charity Image */}
             <img

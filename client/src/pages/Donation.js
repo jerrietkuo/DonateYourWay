@@ -29,7 +29,7 @@ export default function Donation() {
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center" >
       {/* Display the charity card with amount input and donate button */}
       <CardCheckOut onPaymentIntentCreated={handlePaymentIntentCreated} />
       {clientSecret && (

@@ -34,7 +34,7 @@ const Card = () => {
 
   return (
     <div>
-      <div className="flex flex-row flex-wrap justify-center justify-between space-y-4">
+      <div className="flex flex-row flex-wrap justify-center justify-between space-y-4" >
         {/* Filter Applied */}
         {charities.map((charity) => (
           // Card
@@ -43,6 +43,7 @@ const Card = () => {
             data-modal-toggle="defaultModal"
             key={charity._id}
             className="max-w-sm w-90 rounded overflow-hidden shadow-lg rounded-lg"
+            style={{ backgroundColor: "#eff6ff" }}
           >
             {/* Image */}
             <img
